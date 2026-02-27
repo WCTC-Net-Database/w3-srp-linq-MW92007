@@ -44,6 +44,19 @@ public class CharacterReader
     {
         var characters = new List<Character>();
 
+        string[] lines = File.ReadAllLines(_filePath);
+
+        foreach (string line in lines)
+        {
+            if (line == "Name,Profession,Level,HP,Equipment")
+            {
+                continue;
+            }
+
+            Character character = ParseLine(line);
+            characters.Add(character);
+        }
+
         // TODO: Read all lines from file
         // string[] lines = File.ReadAllLines(_filePath);
 
@@ -72,16 +85,11 @@ public class CharacterReader
     /// <param name="characters">The list of characters to search</param>
     /// <param name="name">The name to search for</param>
     /// <returns>The matching character, or null if not found</returns>
-    public Character FindByName(List<Character> characters, string name)
+    public Character? FindByName(string name)
     {
-        // TODO: Use LINQ to find the character
-        // Example: return characters.FirstOrDefault(c => c.Name == name);
-
-        // For case-insensitive search, you could use:
-        // return characters.FirstOrDefault(c =>
-        //     c.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-        return null; // Replace with LINQ query
+        var characters = File.ReadAllLines(_filePath).Skip(1).Select(ParseLine).ToList();
+         
+        return characters.FirstOrDefault(c => c.Name != null && c.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -100,7 +108,7 @@ public class CharacterReader
         // TODO: Use LINQ Where to filter characters
         // return characters.Where(c => c.Profession == profession).ToList();
 
-        return new List<Character>(); // Replace with LINQ query
+        return characters.Where(c => c.Profession == profession).ToList();
     }
 
     /// <summary>
@@ -111,11 +119,40 @@ public class CharacterReader
     /// </summary>
     private Character ParseLine(string line)
     {
-        // TODO: Parse the line and create a Character object
-        // Remember to handle:
-        // - Quoted names with commas: "John, Brave",Fighter,1,10,sword|shield
-        // - Equipment split by | (pipe): sword|shield|potion
+        // Parse CSV line, handling quoted fields and splitting equipment
+        // Handles quoted fields and commas inside quotes
+        List<string> fields = new List<string>();
+        bool inQuotes = false;
+        int start = 0;
+        for (int i = 0; i < line.Length; i++)
+        {
+            if (line[i] == '"')
+            {
+                inQuotes = !inQuotes;
+            }
+            else if (line[i] == ',' && !inQuotes)
+            {
+                fields.Add(line.Substring(start, i - start));
+                start = i + 1;
+            }
+        }
+        fields.Add(line.Substring(start));
 
-        return new Character();
+        string name = fields[0].Trim().Trim('\"', ',');
+        name = name.Replace(",", string.Empty);
+
+        string profession = fields[1].Trim();
+        int level = int.Parse(fields[2].Trim());
+        int hp = int.Parse(fields[3].Trim());
+        string[] equipment = fields[4].Split('|');
+
+        return new Character
+        {
+            Name = name,
+            Profession = profession,
+            Level = level,
+            HP = hp,
+            Equipment = equipment
+        };
     }
 }

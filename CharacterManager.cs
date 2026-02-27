@@ -1,3 +1,6 @@
+using W03.Models;
+using W03.Services;
+
 namespace W03;
 
 /// <summary>
@@ -68,36 +71,41 @@ public class CharacterManager
 
     public void DisplayCharacters()
     {
-        // TODO: Replace this stub with code that reads all character data from the CSV file
-        // and displays each character.
-        // Use string interpolation for formatting output.
-        // Hint: You will need to parse each line and output the character details.
-        Console.WriteLine("Displaying all characters...");
-        Console.WriteLine("John, Brave,Fighter,1,10,sword|shield|potion");
-        Console.WriteLine("Jane,Wizard,2,6,staff|robe|book");
-        Console.WriteLine("Bob, Sneaky,Rogue,3,8,dagger|lockpick|cloak");
-        Console.WriteLine("Alice,Cleric,4,12,mace|armor|potion");
-        Console.WriteLine("Reginald III, Sir,Knight,5,20,sword|armor|horse");
+        // Create a CharacterReader instance with the file path
+        var reader = new CharacterReader(_filePath);
+        var characters = reader.ReadAll();
+        foreach (var character in characters)
+        {
+            Console.WriteLine(character);
+        }
+
+        Console.WriteLine();
     }
 
     public void FindCharacter()
     {
-        // TODO: Replace this stub with code that prompts for a character name,
-        // searches for the character using LINQ, and displays their details.
-        // If not found, notify the user.
-        // Use string interpolation for formatting output.
-        // Hint: You will need to parse the CSV and use LINQ's FirstOrDefault.
         Console.Write("Enter character name to find: ");
         var name = Console.ReadLine();
 
-        if (name == "Bob, Sneaky")
+        if (string.IsNullOrWhiteSpace(name))
         {
-            Console.WriteLine("Bob, Sneaky,Rogue,3,8,dagger|lockpick|cloak");
+            Console.WriteLine("Character name cannot be empty.");
+            return;
         }
-        else
+
+        var reader = new CharacterReader(_filePath);
+        var character = reader.FindByName(name);
+
+        if (character == null)
         {
-            Console.WriteLine("Character not found");
+            Console.WriteLine($"Character '{name}' not found.");
+            return;
         }
+
+        Console.WriteLine(
+            $"Name: {character.Name}, {character.Profession}, " +
+            $"Level {character.Level}, HP {character.HP}, " +
+            $"Equipment: {string.Join(", ", character.Equipment)}");
     }
 
     public void LevelUpCharacter()
@@ -135,6 +143,8 @@ public class CharacterManager
             Console.WriteLine("0. Exit");
             Console.Write("Enter your choice: ");
             var choice = Console.ReadLine();
+
+            Console.WriteLine();
 
             switch (choice)
             {

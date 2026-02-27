@@ -43,6 +43,7 @@ public class CharacterWriter
     /// <param name="characters">The list of characters to save</param>
     public void WriteAll(List<Character> characters)
     {
+
         // TODO: Convert characters to CSV lines and write to file
         // var lines = new List<string>();
         // foreach (var character in characters)
@@ -50,6 +51,15 @@ public class CharacterWriter
         //     lines.Add(FormatCharacter(character));
         // }
         // File.WriteAllLines(_filePath, lines);
+
+        var lines = new List<string>();
+
+        foreach (var character in characters)
+        {
+            lines.Add(FormatCharacter(character));
+        }
+
+        File.WriteAllLines(_filePath, lines);
     }
 
     /// <summary>
@@ -69,6 +79,9 @@ public class CharacterWriter
         // TODO: Format and append the character
         // string line = FormatCharacter(character);
         // File.AppendAllText(_filePath, line + Environment.NewLine);
+
+        string line = FormatCharacter(character);
+        File.AppendAllText(_filePath, line + Environment.NewLine); 
     }
 
     /// <summary>
